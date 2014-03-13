@@ -6,8 +6,10 @@ Created while working for the US Geological Survey
 
 @author: brent lunghino
 """
+import os
 import csv
 
+import matplotlib
 import numpy as np
 from matplotlib import cm, pyplot as plt
 from scipy.stats import nanmean
@@ -37,16 +39,16 @@ class BaseGSFile:
                          9: 'Unknown',
                     }  
     ## allows a directory to be specified by subclassing
-    csv_directory = r'C:/Users/blunghino/Field Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
+    project_directory = r'C:/Users/blunghino/Field Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
     ## allows mm/pixel ratio to be specified by subclassing    
     mm_pix = None
     
     def __init__(
               self, 
-              csv_file_name, 
+              csv_file_location, 
               csv_directory='', 
               mm_pix=None,
-              layer_type_lookup=None
+              layer_type_lookup=None,
               metadata_rows=17, 
               col_header_rows=6, 
               numeric_fields=('Min Depth', 'Max Depth', 'Layer Type', 'Layer'),
@@ -67,14 +69,14 @@ class BaseGSFile:
         """
         ## allows settings to be overridden when the object is initiated
         if csv_directory:
-            self.csv_directory = csv_directory
+            self.project_directory = project_directory
         if mm_pix:
             self.mm_pix = mm_pix
         if layer_type_lookup:
             self.layer_type_lookup = layer_type_lookup
         ## get the full file path for the csv file
-        self.csv_file_path = self.get_csv_file_path(csv_file_name)
-        self.gsfileuniform = csv_file_name
+        self.csv_file_path = self.get_csv_file_path(csv_file_location)
+        self.gsfileuniform = os.path.split(self.csv_file_path)[1]
         with open(self.csv_file_path, 'r') as csvfile:
             rdr = csv.reader(csvfile, dialect='excel', strict=True, 
                              skipinitialspace=True)
@@ -111,9 +113,9 @@ class BaseGSFile:
         self.dists = temp[:,1:]
         self.mid_depth = (self.min_depth+self.max_depth) / 2                        
 
-    def get_csv_file_path(self, csv_file_name):
+    def get_csv_file_path(self, csv_file_location):
         """return the full path to the csv file"""
-        return self.csv_directory + csv_file_name
+        return self.project_directory + csv_file_location
         
     def _convert_bins_to_phi(self):
         """
@@ -268,7 +270,7 @@ class GSFile(BaseGSFile):
             return depths
         
     def fig_dists_depth(self, figsize=(8,10), phi_min=-2, phi_max=4, 
-                         pcolor=True, tsunami_only=True):
+                         pcolor=True, tsunami_only=True, min_layer=None):
         """
         create a matplotlib figure plotting grain size distribution with depth
         
@@ -279,10 +281,11 @@ class GSFile(BaseGSFile):
         ax = plt.subplot(111)
         plt.title('Grain-size distributions at %s' % self.id)
         ## set layer filter value
-        if tsunami_only:
-            min_layer = 0
-        else:
-            min_layer = -2
+        if min_layer is None:
+            if tsunami_only:
+                min_layer = 0
+            else:
+                min_layer = -2
         ## filter dists so that only layer values > min_layer are plotted
         dists = self.dists[:,self.layer > min_layer]
         max_depth = self.max_depth[self.layer > min_layer]
@@ -322,13 +325,12 @@ class GSFile(BaseGSFile):
         ax.invert_yaxis()
         ax.set_xlim((phi_min, phi_max))
         ax.set_ylim(bottom=np.nanmax(max_depth))
-        plt.xlabel(r'Size ($\mathsf{\phi}$)')
+        plt.xlabel('Size (\u03D5)')
         plt.ylabel('Depth (%s)' % self.depth_units)
-        plt.title('Grain-size distribution at %s' % self.id)
         return fig
         
     def fig_dists_stacked(self, figsize=(16,12), phi_min=-2, phi_max=4, 
-                            tsunami_only=True):
+                            tsunami_only=True, min_layer=None):
         """
         plot grain size distributions on one axis
         """
@@ -336,13 +338,15 @@ class GSFile(BaseGSFile):
         ax = plt.subplot(111)
         plt.title('Grain size distributions at %s' % self.id)
         ## set layer filter value
-        if tsunami_only:
-            min_layer=0
-        else:
-            min_layer=-2
+        if min_layer is None:
+            if tsunami_only:
+                min_layer = 0
+            else:
+                min_layer = -2
         ## filter dists so that only layer values > min_layer are plotted
         dists = self.dists[:, self.layer > min_layer]
         n_dists = dists.shape[1]
+        labels = [self.sample_id[ii] for ii, L in enumerate(self.layer) if L > min_layer]
         ## set up custom cmap
         cmap = cm.get_cmap('spectral')
         c = [cmap(1.*((ii+1)/(n_dists+1))) for ii in range(n_dists)]
@@ -358,9 +362,9 @@ class GSFile(BaseGSFile):
             return fig
         ## plot each distribution
         for ii, d in enumerate(dists.T):
-            plt.plot(bins, d, c=c[ii], label=self.sample_id[ii])
+            plt.plot(bins, d, c=c[ii], label=labels[ii], lw=1.5)
         plt.legend(loc=0)
         ax.set_xlim((phi_min, phi_max))
         plt.ylabel(self.distribution_units)
-        plt.xlabel(r'Size ($\mathsf{\phi}$)')
+        plt.xlabel('Size (\u03D5)')
         return fig
