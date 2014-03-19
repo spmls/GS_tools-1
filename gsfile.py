@@ -14,6 +14,19 @@ import numpy as np
 from matplotlib import cm, pyplot as plt
 from scipy.stats import nanmean
 
+layer_type_lookup = {
+                        -1: 'Post-tsunami',
+                         0: 'Pre-tsunami',
+                         1: 'Suspension graded',
+                         2: 'Inverse graded',
+                         3: 'Normal graded',
+                         4: 'Massive',
+                         5: 'Not classified',
+                         6: 'Not suspension graded',
+                         7: 'Mud',
+                         8: 'Mud cap',
+                         9: 'Unknown',
+                    } 
 
 class BaseGSFile:
     """
@@ -39,14 +52,14 @@ class BaseGSFile:
                          9: 'Unknown',
                     }  
     ## allows a directory to be specified by subclassing
-    project_directory = r'C:/Users/blunghino/Field Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
+    project_directory = ''
     ## allows mm/pixel ratio to be specified by subclassing    
     mm_pix = None
     
     def __init__(
               self, 
               csv_file_location, 
-              csv_directory='', 
+              project_directory='', 
               mm_pix=None,
               layer_type_lookup=None,
               metadata_rows=17, 
@@ -68,8 +81,10 @@ class BaseGSFile:
         mm_pix is the mm per pixel conversion factor
         """
         ## allows settings to be overridden when the object is initiated
-        if csv_directory:
+        if project_directory:
             self.project_directory = project_directory
+        elif not self.project_directory:
+            self.project_directory = os.getcwd()
         if mm_pix:
             self.mm_pix = mm_pix
         if layer_type_lookup:
@@ -115,7 +130,7 @@ class BaseGSFile:
 
     def get_csv_file_path(self, csv_file_location):
         """return the full path to the csv file"""
-        return self.project_directory + csv_file_location
+        return os.path.join(self.project_directory, csv_file_location)
         
     def _convert_bins_to_phi(self):
         """
