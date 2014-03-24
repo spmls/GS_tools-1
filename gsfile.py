@@ -126,7 +126,7 @@ class BaseGSFile:
         self.bins_phi = self._convert_bins_to_phi()
         self.bins_phi_mid = self._convert_bins_to_phi_mid()
         self.dists = temp[:,1:]
-        self.mid_depth = (self.min_depth+self.max_depth) / 2                        
+        self.mid_depth = (self.min_depth+self.max_depth) / 2.                        
 
     def get_csv_file_path(self, csv_file_location):
         """return the full path to the csv file"""
@@ -231,7 +231,7 @@ class GSFile(BaseGSFile):
         else:
             dists = self.dists[:,self.layer > 0]
         bulk_dist = nanmean(dists, axis=1)
-        bulk_dist = 100 * bulk_dist / bulk_dist.sum()
+        bulk_dist = 100. * bulk_dist / bulk_dist.sum()
         return bulk_dist
         
     def bulk_mean(self, gs_min_max=None):
@@ -284,8 +284,9 @@ class GSFile(BaseGSFile):
                     depths[ii] = n + (x-n)/2
             return depths
         
-    def fig_dists_depth(self, figsize=(8,10), phi_min=-2, phi_max=4, 
-                         pcolor=True, tsunami_only=True, min_layer=None):
+    def fig_dists_depth(self, figsize=(8,10), phi_min=-2, phi_max=4,
+                         pcolor=True, tsunami_only=True, min_layer=None, 
+                         unicode_label=False):
         """
         create a matplotlib figure plotting grain size distribution with depth
         
@@ -340,12 +341,17 @@ class GSFile(BaseGSFile):
         ax.invert_yaxis()
         ax.set_xlim((phi_min, phi_max))
         ax.set_ylim(bottom=np.nanmax(max_depth))
-        plt.xlabel('Size (\u03D5)')
+        if unicode_label:
+            plt.xlabel('Size (\u03D5)')            
+        else:
+            plt.xlabel(r'Size ($\mathsf{\phi}$)')
         plt.ylabel('Depth (%s)' % self.depth_units)
         return fig
-        
+    
+    
     def fig_dists_stacked(self, figsize=(16,12), phi_min=-2, phi_max=4, 
-                            tsunami_only=True, min_layer=None):
+                            tsunami_only=True, min_layer=None, 
+                            unicode_label=False):
         """
         plot grain size distributions on one axis
         """
@@ -381,5 +387,8 @@ class GSFile(BaseGSFile):
         plt.legend(loc=0)
         ax.set_xlim((phi_min, phi_max))
         plt.ylabel(self.distribution_units)
-        plt.xlabel('Size (\u03D5)')
+        if unicode_label:
+            plt.xlabel('Size (\u03D5)')            
+        else:
+            plt.xlabel(r'Size ($\mathsf{\phi}$)')
         return fig
