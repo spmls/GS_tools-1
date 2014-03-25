@@ -9,9 +9,9 @@ requirements
  - numpy
  - scipy
 
->>>from GS_tools.gsfile import GSFile
+ >>>from GS_tools.gsfile import GSFile
 
->>>gsfileobject = GSFile('csv_file_name', 'csv_directory')
+ >>>gsfileobject = GSFile('csv_file_name', 'project_directory')
 
 
 look in the csv directory for examples of how grain size data csv files 
