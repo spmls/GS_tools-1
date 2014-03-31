@@ -45,7 +45,7 @@ def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
     sample_id = [gsf.sample_id[ii] for ii, L in enumerate(gsf.layer) if L >= min_layer]
     y2 = np.zeros_like(bins)
     gs = gridspec.GridSpec(1, 2, width_ratios=[3, 1])
-    ms = 8
+    ms = 7.5
     for ii, d in enumerate(mid_depth):
         fig = plt.figure(figsize=figsize)
         fig.suptitle('%s: %s' % (gsf.id, sample_id[ii]))
@@ -55,11 +55,11 @@ def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
         if ii != 0:
             ax0.plot(bins, dists[:,ii-1], 'b')
             ax0.fill_between(bins, dists[:,ii-1], y2, color='b', alpha=.5)
-            ax1.plot(means[ii-1], mid_depth[ii-1], 'o', c='b', ms=ms-1)
+            ax1.plot(means[ii-1], mid_depth[ii-1], 'o', c='b', ms=ms)
         if ii != len(mid_depth) - 1:
             ax0.plot(bins, dists[:,ii+1], 'r')
             ax0.fill_between(bins, dists[:,ii+1], y2, color='r', alpha=.5)
-            ax1.plot(means[ii+1], mid_depth[ii+1], 'o', c='r', ms=ms-1)
+            ax1.plot(means[ii+1], mid_depth[ii+1], 'o', c='r', ms=ms)
         ax0.plot(bins, dists[:,ii], 'k', zorder=10)
         ax0.fill_between(bins, dists[:,ii], y2, color='DimGray', zorder=9,
                          alpha=.9)
@@ -80,8 +80,8 @@ def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
     return figs
 
 
-def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='', overwrite=False, dpi=300,
-             transparent=False):
+def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='', 
+             overwrite=False, dpi=300, transparent=False):
     """
     save figure "fig"
 
@@ -103,9 +103,15 @@ def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='', over
     if os.path.exists(save_dir) and not overwrite:
         ii = 0
         save_dir += '__'
-        while os.path.exists(save_dir) and ii < 10:
-            ii += 1
-            save_dir = save_dir[:-1] + str(ii)
+        while os.path.exists(save_dir):
+            if ii < 10:
+                ii += 1
+                save_dir = save_dir[:-1] + str(ii)
+            else:
+                print('')
+                print('compare_dists_above_below.figsaver:')
+                print('Could not save, specify different dir_title')
+                return
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     for ii, fig in enumerate(figs):
@@ -117,6 +123,7 @@ def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='', over
 
 if __name__ == "__main__":
     gsf_name = 'GS_Sumatra_LhokKruet_SUM21.csv'
-    pd = '/Users/blunghino/Field_Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
+    pd = r'C:\Users\blunghino\Field Sites\Tsunami_Deposit_Database\TsuDepData\Uniform_GS_Data\\'
+#    pd = '/Users/blunghino/Field_Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
     gsf = GSFile(gsf_name, project_directory=pd)
     figs = compare_dists_above_below(gsf, phi_min_max=(0,4), save_fig='png')
