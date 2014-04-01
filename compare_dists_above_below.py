@@ -101,8 +101,8 @@ def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='', over
         dir_title = dt.datetime.strftime(dt.datetime.today(), '%Y-%m-%d')
     save_dir = os.path.join(dir_path, 'Figures_%s' % dir_title)
     if os.path.exists(save_dir) and not overwrite:
-        ii = 0
-        save_dir += '__'
+        ii = 1
+        save_dir += '_1'
         while os.path.exists(save_dir) and ii < 10:
             ii += 1
             save_dir = save_dir[:-1] + str(ii)
@@ -116,7 +116,7 @@ def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='', over
 
 
 if __name__ == "__main__":
-    gsf_name = 'GS_Sumatra_LhokKruet_SUM21.csv'
+    gsf_name = 'GS_Sumatra_Busung_SUM37.csv'
     pd = '/Users/blunghino/Field_Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
     gsf = GSFile(gsf_name, project_directory=pd)
-    figs = compare_dists_above_below(gsf, phi_min_max=(0,4), save_fig='png')
+    figs = compare_dists_above_below(gsf, phi_min_max=(0,4))
