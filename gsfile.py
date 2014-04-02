@@ -70,7 +70,8 @@ class BaseGSFile:
     ):
         """
         csv_file_name is the name of the csv file 
-        (can be full path or configure get_csv_file_path)
+        (can be full path or name in project directory, also can
+         set file path by overriding get_csv_file_path method)
         
         metadata_rows is the number of rows in the csv file before the start 
         of the grain size distribution data
@@ -94,6 +95,8 @@ class BaseGSFile:
         ## get the full file path for the csv file
         self.csv_file_path = self.get_csv_file_path(csv_file_location)
         self.gsfileuniform = os.path.split(self.csv_file_path)[1]
+        ## keep track of sequences
+        self.sequence_attrs = []
         with open(self.csv_file_path, 'r') as csvfile:
             rdr = csv.reader(csvfile, dialect='excel', strict=True,
                              skipinitialspace=True)
@@ -106,30 +109,41 @@ class BaseGSFile:
                 if m[0] in numeric_fields:
                     att = np.asarray([x if x != '' else "nan" for x in m[1:]],
                                      dtype=np.float64)
-                ## values for non numeric fields are kept as lists 
+                ## values for non numeric fields are kept as strings
                 else:
-                    att = m[1:]
-                ## first group of meta data store a single value associated 
-                ## with the entire file    
+                    att = np.asarray(m[1:])
+                ## attribute name
+                name = m[0].replace(' ', '_').lower()
+                ## first group of meta data store a single value associated
+                ## with the entire file
                 if ii < metadata_rows - col_header_rows - 1:
-                    setattr(self, m[0].replace(' ', '_').lower(), att[0])
+                    setattr(self, name, att[0])
                 ## second group of meta data rows stores a sequence of values
                 ## with one value for each grain size sample (col_header_rows)
                 elif len(att) > 0:
-                    setattr(self, m[0].replace(' ', '_').lower(), att)
+                    setattr(self, name, att)
+                    self.sequence_attrs.append(name)
                 ## when no data exists in a col_header_row setattr to None
                 else:
-                    setattr(self, m[0].replace(' ', '_').lower(), None)
+                    setattr(self, name, None)
+        self.mid_depth = (self.min_depth+self.max_depth) / 2.
+        ## get indices to sort with
+        ind = np.argsort(self.mid_depth)
+        self.mid_depth = self.mid_depth[ind]
         ## get strings values for layer type codes
-        self.layer_type_strings = [self.layer_type_lookup[x] for x in self.layer_type]
+        self.layer_type_strings = np.asarray(
+            [self.layer_type_lookup[x] for x in self.layer_type])[ind]
         ## get data into numpy array
         temp = np.asarray(lines[metadata_rows:], dtype=np.float64)
         self.bins = temp[:, 0]
         self.bins_phi = self._convert_bins_to_phi()
         self.bins_phi_mid = self._convert_bins_to_phi_mid()
         self.dists = temp[:, 1:]
-        self.mid_depth = (self.min_depth + self.max_depth) / 2.
-
+        self.dists = self.dists[:, ind]
+        for seq in self.sequence_attrs:
+            sorted = getattr(self, seq)[ind]
+            setattr(self, seq, sorted)
+            
     def get_csv_file_path(self, csv_file_location):
         """return the full path to the csv file"""
         return os.path.join(self.project_directory, csv_file_location)
@@ -308,12 +322,12 @@ class GSFile(BaseGSFile):
                 if n == x:
                     depths[ii] = n
                 else:
-                    depths[ii] = n + (x - n) / 2
+                    depths[ii] = n + (x-n) / 2
             return depths
 
     def fig_dists_depth(self, figsize=(8, 10), phi_min=-2, phi_max=4,
                         pcolor=True, tsunami_only=True, min_layer=None,
-                        unicode_label=False):
+                        unicode_label=False, show_sg=False):
         """
         create a matplotlib figure plotting grain size distribution with depth
         
@@ -333,6 +347,7 @@ class GSFile(BaseGSFile):
         dists = self.dists[:, self.layer >= min_layer]
         max_depth = self.max_depth[self.layer >= min_layer]
         min_depth = self.min_depth[self.layer >= min_layer]
+        layer_type = self.layer_type[self.layer >= min_layer]
         ## check that depth data exists
         if np.isnan(max_depth).all():
             plt.text(.5, .5, 'No depth values associated with grain-size data',
@@ -360,11 +375,20 @@ class GSFile(BaseGSFile):
                      'Grain size bins must convert to phi for this figure',
                      ha='center')
             return fig
+        ## set up line color to correspond to suspension grading
+        color = list(color) * len(layer_type)
+        if show_sg:
+            for ii, L in enumerate(layer_type):
+                if L != 1:
+                    if pcolor:
+                        color[ii] = 'k'
+                    else:
+                        color[ii] = 'b'
         ## plot a line for each distribution
         for ii, d in enumerate(max_depth):
             ## normalize to the max, and scale to plot within the depth range
             normed = dists[:, ii] * (min_depth[ii] - d) * .95 / dists[:, ii].max()
-            plt.plot(bins, d + normed, color, lw=2.25)
+            plt.plot(bins, d + normed, color[ii], lw=2.25)
         ax.invert_yaxis()
         ax.set_xlim((phi_min, phi_max))
         ax.set_ylim(bottom=np.nanmax(max_depth))
