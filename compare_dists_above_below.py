@@ -12,7 +12,8 @@ matplotlib.rcParams['font.size'] = 16
 
 
 def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
-                              figsize=(18,11), phi_min_max=None, save_fig=False):
+                              figsize=(18,11), phi_min_max=None,
+                              depth_min_max=None, save_fig=False):
     """
     make a set of figures comparing a grain size distribution with
     the distributions directly above and below it in the core/trench
@@ -27,6 +28,9 @@ def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
 
     phi_min_max: can pass a tuple (min_phi, max_phi) used to set the x limits for
         the distribution plots (min_phi is the largest grain size to include)
+
+    depth_min_max: tuple (min_depth, max_depth) used to specify a range of depth
+        values to plot
 
     save_fig: if True, saves each fig as a png
     """

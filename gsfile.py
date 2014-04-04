@@ -143,7 +143,7 @@ class BaseGSFile:
         for seq in self.sequence_attrs:
             sorted = getattr(self, seq)[ind]
             setattr(self, seq, sorted)
-            
+
     def get_csv_file_path(self, csv_file_location):
         """return the full path to the csv file"""
         return os.path.join(self.project_directory, csv_file_location)
@@ -212,14 +212,20 @@ class GSFile(BaseGSFile):
             normed_dists[:,ii] = normed_to * dist / dist.sum()
         return normed_dists
 
-    def dist_means(self):
+    def dist_means(self, min_size=None):
         """
         calculate the mean of each distribution
         """
         means = np.zeros_like(self.mid_depth)
-        dists = self.dists
+        if min_size:
+            filtr = self.bins_phi_mid < min_size
+            dists = self.dists[filtr, :]
+            bins_phi_mid = self.bins_phi_mid[filtr]
+        else:
+            dists = self.dists
+            bins_phi_mid = self.bins_phi_mid
         for ii, dist in enumerate(dists.T):
-            means[ii] = np.sum(dist * self.bins_phi_mid) / dist.sum()
+            means[ii] = np.sum(dist * bins_phi_mid) / dist.sum()
         return means
 
     def dist_devs(self):
