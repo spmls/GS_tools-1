@@ -42,11 +42,25 @@ def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
         else:
             min_layer = -1
     ## filter dists so that only layer values >= min_layer are plotted
-    dists = gsf.dist_normed(normed_to=100)[:, gsf.layer >= min_layer]
-    mid_depth = gsf.mid_depth[gsf.layer >= min_layer]
-    means = gsf.dist_means()[gsf.layer >= min_layer]
-    bins = gsf.bins_phi
-    sample_id = [gsf.sample_id[ii] for ii, L in enumerate(gsf.layer) if L >= min_layer]
+    f1 = gsf.layer >= min_layer
+    dists = gsf.dist_normed(normed_to=100)[:, f1]
+    mid_depth = gsf.mid_depth[gsf.layer >= f1]
+    means = gsf.dist_means()[gsf.layer >= f1]
+    f2 = np.isfinite(mid_depth)
+    dists = dists[:, f2]
+    mid_depth = mid_depth[f2]
+    means = means[f2]
+    if gsf.bins_phi is None:
+        bins = gsf.bins_phi_mid
+    else:
+        bins = gsf.bins_phi
+    if bins is None:
+        print('GS_tools: {}: No grain size bin data'.format(gsf.id))
+#    sample_id = np.asarray(
+#        [gsf.sample_id[ii] for ii, L in enumerate(gsf.layer) if L >= min_layer]
+#    )
+    sample_id = gsf.sample_id[f1]
+    sample_id = sample_id[f2]
     y2 = np.zeros_like(bins)
     gs = gridspec.GridSpec(1, 2, width_ratios=[3, 1])
     ms = 7.5
@@ -126,8 +140,8 @@ def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='',
 
 
 if __name__ == "__main__":
-    gsf_name = 'GS_Sumatra_LhokKruet_SUM21.csv'
-#    pd = r'C:\Users\blunghino\Field Sites\Tsunami_Deposit_Database\TsuDepData\Uniform_GS_Data\\'
-    pd = '/Users/blunghino/Field_Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
-    gsf = GSFile(gsf_name, project_directory=pd)
+    gsf_name = 'GS_Sumatra_KualaMerisi_trench16.csv'
+    pd_pc = r'C:\Users\blunghino\Field Sites\Tsunami_Deposit_Database\TsuDepData\Uniform_GS_Data\\'
+    pd_mac = '/Users/blunghino/Field_Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
+    gsf = GSFile(gsf_name, project_directory=pd_pc)
     figs = compare_dists_above_below(gsf, phi_min_max=(0,4))

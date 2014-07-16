@@ -40,7 +40,7 @@ def add_new_dists(fig, new, bin_units='phi'):
     """
     add distributions from GSFile 'new' to the first axis of figure 'fig'
     """
-    c = ['DarkOrange', 'DarkRed', 'DarkOrchid']
+    c = ['DarkOrange', 'DarkRed', 'DimGray', 'm']
     ax = fig.get_axes()[0]
     hands, labs = ax.get_legend_handles_labels()
     if bin_units == 'phi':

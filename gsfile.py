@@ -69,9 +69,8 @@ class BaseGSFile:
             numeric_fields=('Min Depth', 'Max Depth', 'Layer Type', 'Layer'),
     ):
         """
-        csv_file_name is the name of the csv file 
-        (can be full path or name in project directory, also can
-         set file path by overriding get_csv_file_path method)
+        csv_file_location is the name of the csv file in project_directory, 
+        (also can set file path by overriding get_csv_file_path method)
         
         metadata_rows is the number of rows in the csv file before the start 
         of the grain size distribution data

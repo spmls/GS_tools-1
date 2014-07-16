@@ -12,7 +12,7 @@ from numpy import asarray as ary
 from numpy.testing import assert_allclose, assert_array_equal, assert_array_almost_equal
 
 import TsuDB as tdb
-from TsuDB import TsuDBGSFile
+
 
 class TestGSFileClass(unittest.TestCase):
     
@@ -24,9 +24,9 @@ class TestGSFileClass(unittest.TestCase):
     a_bins_phi_mid_3 = -0.375
     a_typegs = 'STLD'
     b_csv_file_name = 'GS_Sumatra_Lhokkruet2_T1.csv'
-    b_dist_means = ary([1.275675, 1.80715, 1.666925])
-    b_dist_stds = ary([0.887167727, 0.883166074, 1.012755422])
-    b_dist_moments_2 = ary([-0.591407243, -0.92246897, -1.372314436])
+    b_dist_means = ary([1.666925, 1.80715, 1.275675])
+    b_dist_stds = ary([1.012755422, 0.883166074, 0.887167727])
+    b_dist_moments_2 = ary([-1.372314436, -0.92246897, -0.591407243])
     b_bin_units = 'phi mid'
     c_csv_file_name = 'GS_Japan_Sendai_T3-10.csv'
     c_dist_moments_3 = ary([22.694552, 51.320702, 32.55427, 53.349303, 
@@ -166,13 +166,13 @@ class TestGSFileClass(unittest.TestCase):
     c_id = 'Sendai, T3-10'
     c_get_depth_bin_edges = ary([0, 1, 2, 3, 4, 5, 6, 7.25, 8.5])
     d_csv_file_name = 'GS_Japan_Sendai_T3-77.csv'
-    d_mid_depth = ary([np.nan, 5.5])
-    d_min_depth = ary([np.nan, 5])
+    d_mid_depth = ary([5.5, np.nan])
+    d_min_depth = ary([5, np.nan])
     
-    a = TsuDBGSFile(a_csv_file_name)
-    b = TsuDBGSFile(b_csv_file_name)
-    c = TsuDBGSFile(c_csv_file_name)
-    d = TsuDBGSFile(d_csv_file_name)
+    a = tdb.TsuDBGSFile(a_csv_file_name)
+    b = tdb.TsuDBGSFile(b_csv_file_name)
+    c = tdb.TsuDBGSFile(c_csv_file_name)
+    d = tdb.TsuDBGSFile(d_csv_file_name)
         
     def test_gsfile_init(self):
         """
@@ -182,21 +182,21 @@ class TestGSFileClass(unittest.TestCase):
         self.assertEqual(self.b.bin_units, self.b_bin_units)
         self.assertEqual(self.a.bins_phi[1], self.a_bins_phi_1)
         self.assertEqual(self.a.bins_phi_mid[3], self.a_bins_phi_mid_3)
-        self.assertIsInstance(self.a.trench_name, list)
         self.assertEqual(self.c.id, self.c_id)
         self.assertIsInstance(self.a.mid_depth, np.ndarray)
+        self.assertIsInstance(self.a.trench_name, np.ndarray)
         
     def test_gsfile_dist_means(self):
-        assert_allclose(self.b.dist_means(), self.b_dist_means)
         assert_allclose(self.a.dist_means(), self.a_dist_means, rtol=.01)
+        assert_allclose(self.b.dist_means(), self.b_dist_means)
     
     def test_gsfile_dist_stds(self):
         assert_allclose(self.a.dist_stds(), self.a_dist_stds, rtol=.01)
         assert_allclose(self.b.dist_stds(), self.b_dist_stds)
         
     def test_gsfile_dist_moments(self):
-        assert_allclose(self.b.dist_moments()[2], self.b_dist_moments_2)
         assert_allclose(self.c.dist_moments()[3], self.c_dist_moments_3, rtol=1e-05)
+        assert_allclose(self.b.dist_moments()[2], self.b_dist_moments_2)
         
     def test_gsfile_get_depth_bin_edges(self):
         """
