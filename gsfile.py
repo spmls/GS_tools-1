@@ -95,7 +95,7 @@ class BaseGSFile:
         self.csv_file_path = self.get_csv_file_path(csv_file_location)
         self.gsfileuniform = os.path.split(self.csv_file_path)[1]
         ## keep track of sequences
-        self.sequence_attrs = [
+        self.sequence_attrs = []
         ## parse csv file contents by row
         try:
             with open(self.csv_file_path, 'r') as csvfile:
