@@ -96,11 +96,17 @@ class BaseGSFile:
         self.gsfileuniform = os.path.split(self.csv_file_path)[1]
         ## keep track of sequences
         self.sequence_attrs = []
-        with open(self.csv_file_path, 'r') as csvfile:
-            rdr = csv.reader(csvfile, dialect='excel', strict=True,
-                             skipinitialspace=True)
-            ## sequence of lists where each list is a row from the csv file
-            lines = [line for line in rdr]
+        try:
+            with open(self.csv_file_path, 'r') as csvfile:
+                rdr = csv.reader(csvfile, dialect='excel', strict=True,
+                                 skipinitialspace=True)
+                ## sequence of lists where each list is a row from the csv file
+                lines = [line for line in rdr]
+        except:
+            with open(self.csv_file_path, 'rU') as csvfile:
+                rdr = csv.reader(csvfile, dialect=csv.excel, strict=True,
+                                 skipinitialspace=True)
+                lines = [line for line in rdr]
         ## parse csv file contents by row  
         for ii, m in enumerate(lines[:metadata_rows]):
             if m[0]:

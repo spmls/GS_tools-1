@@ -143,5 +143,6 @@ if __name__ == "__main__":
     gsf_name = 'GS_Sumatra_KualaMerisi_trench16.csv'
     pd_pc = r'C:\Users\blunghino\Field Sites\Tsunami_Deposit_Database\TsuDepData\Uniform_GS_Data\\'
     pd_mac = '/Users/blunghino/Field_Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
-    gsf = GSFile(gsf_name, project_directory=pd_pc)
+    gsf = GSFile(gsf_name, project_directory=pd_mac)
     figs = compare_dists_above_below(gsf, phi_min_max=(0,4))
+    plt.show()
