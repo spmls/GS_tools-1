@@ -33,10 +33,10 @@ layer_type_lookup = {
 class BaseGSFile:
     """
     base class to store and manipulate grain size data
-    
+
     when initialized, reads in data from a uniform format csv file stored in
     csv_directory
-    
+
     layers can be classified according to layer_type_lookup
     """
     ## allows layer classifications to be specified by subclassing
@@ -55,7 +55,7 @@ class BaseGSFile:
     }
     ## allows a directory to be specified by subclassing
     project_directory = ''
-    ## allows mm/pixel ratio to be specified by subclassing    
+    ## allows mm/pixel ratio to be specified by subclassing
     mm_pix = None
 
     def __init__(
@@ -69,17 +69,17 @@ class BaseGSFile:
             numeric_fields=('Min Depth', 'Max Depth', 'Layer Type', 'Layer'),
     ):
         """
-        csv_file_location is the name of the csv file in project_directory, 
+        csv_file_location is the name of the csv file in project_directory,
         (also can set file path by overriding get_csv_file_path method)
-        
-        metadata_rows is the number of rows in the csv file before the start 
+
+        metadata_rows is the number of rows in the csv file before the start
         of the grain size distribution data
-        
-        col_header_rows is the number of rows in the csv file that contain 
+
+        col_header_rows is the number of rows in the csv file that contain
         metadata specific to each sample in the csv file.
-        These rows must come between the trench scale metadata and the 
+        These rows must come between the trench scale metadata and the
         grain size distribution
-        
+
         mm_pix is the mm per pixel conversion factor
         """
         ## allows settings to be overridden when the object is initiated
@@ -95,7 +95,8 @@ class BaseGSFile:
         self.csv_file_path = self.get_csv_file_path(csv_file_location)
         self.gsfileuniform = os.path.split(self.csv_file_path)[1]
         ## keep track of sequences
-        self.sequence_attrs = []
+        self.sequence_attrs = [
+        ## parse csv file contents by row
         try:
             with open(self.csv_file_path, 'r') as csvfile:
                 rdr = csv.reader(csvfile, dialect='excel', strict=True,
@@ -107,7 +108,6 @@ class BaseGSFile:
                 rdr = csv.reader(csvfile, dialect=csv.excel, strict=True,
                                  skipinitialspace=True)
                 lines = [line for line in rdr]
-        ## parse csv file contents by row  
         for ii, m in enumerate(lines[:metadata_rows]):
             if m[0]:
                 ## values for numeric fields are converted to numpy arrays
@@ -250,7 +250,7 @@ class GSFile(BaseGSFile):
         devs = self.dist_devs()[0]
         variances = np.zeros_like(self.mid_depth)
         for ii, dist in enumerate(self.dists.T):
-            variances[ii] = np.sum(dist * devs[:, ii] ** 2) / dist.sum()
+            variances[ii] = np.sum(dist * (devs[:, ii] ** 2)) / dist.sum()
         return np.sqrt(variances)
 
     def dist_moments(self):
@@ -271,7 +271,7 @@ class GSFile(BaseGSFile):
 
     def bulk_dist(self):
         """
-        calculate bulk distribution for all samples of tsunami 
+        calculate bulk distribution for all samples of tsunami
         sediments in trench
         """
         if not np.isnan(self.min_depth).any() and len(self.sample_id) > 1:
@@ -289,8 +289,8 @@ class GSFile(BaseGSFile):
     def bulk_mean(self, gs_min_max=None):
         """
         calculate bulk mean of all samples of tsunami sediments in trench
-        
-        gs_min_max is a sequence of length 2 specifying the minimum grain size 
+
+        gs_min_max is a sequence of length 2 specifying the minimum grain size
         and maximum grain size to include in the calculations (in phi)
         """
         if self.bins_phi_mid is None:
@@ -298,8 +298,8 @@ class GSFile(BaseGSFile):
         else:
             dist = self.bulk_dist()
             if gs_min_max is not None:
-                f1 = gs_min_max[0] >= self.bins_phi_mid
-                f2 = gs_min_max[1] <= self.bins_phi_mid
+                f1 = self.bins_phi_mid <= gs_min_max[0]
+                f2 = self.bins_phi_mid >= gs_min_max[1]
                 filtr = f1 * f2
                 dist = dist[filtr]
                 bins = self.bins_phi_mid[filtr]
@@ -307,13 +307,35 @@ class GSFile(BaseGSFile):
                 bins = self.bins_phi_mid
             return np.sum(dist * bins) / dist.sum()
 
+    def bulk_std(self, gs_min_max=None):
+        """
+        calculate bulk standard deviation of all samples of tsunami sediments
+        in trench
+        """
+        if self.bins_phi_mid is None:
+            return np.nan
+        else:
+            dist = self.bulk_dist()
+            mean = self.bulk_mean(gs_min_max=gs_min_max)
+            if gs_min_max is not None:
+                f1 = self.bins_phi_mid <= gs_min_max[0]
+                f2 = self.bins_phi_mid >= gs_min_max[1]
+                filtr = f1 * f2
+                dist = dist[filtr]
+                bins = self.bins_phi_mid[filtr]
+            else:
+                bins = self.bins_phi_mid
+            dev = bins - mean
+            variance = np.sum(dist * (dev ** 2)) / dist.sum()
+            return np.sqrt(variance)
+
     def _get_depth_bin_edges(self, min_layer=-1):
         """
         internal method to deal with uneven depth spacing when plotting pcolor
-        
+
         eg if min_depth = [0, 1, 2.5], max_depth = [1, 2, 3.5]
         returns [0, 1, 2.25, 3.5]
-        
+
         min_layer designates the lower boundary of layers to use from the
         layer attribute field
         """
@@ -341,7 +363,7 @@ class GSFile(BaseGSFile):
                         unicode_label=False, show_sg=False):
         """
         create a matplotlib figure plotting grain size distribution with depth
-        
+
         phi_min is the minimum phi value (maximum grain size)
         phi_max is the maximum phi value (minimum grain size)
         """
