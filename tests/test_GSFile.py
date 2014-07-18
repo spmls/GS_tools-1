@@ -231,7 +231,7 @@ class TestGSFileClass(unittest.TestCase):
         self.assertAlmostEqual(self.c.bulk_mean(), self.c_bulk_mean, places=5)
 
     def test_gsfile_bulk_std(self):
-        self.assertAlmostEqual(self.c.bulk_std(), self.c_bulk_std, places=5)
+        self.assertAlmostEqual(self.c.bulk_std(), self.c_bulk_std, places=4)
 
     def test_gsfile_bulk_mean_sand_only(self):
         """

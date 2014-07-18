@@ -292,16 +292,16 @@ class GSFile(BaseGSFile):
         else:
             dist = self.bulk_dist()
             if gs_min_max is not None:
-                f1 = gs_min_max[0] >= self.bins_phi_mid
-                f2 = gs_min_max[1] <= self.bins_phi_mid
+                f1 = self.bins_phi_mid <= gs_min_max[0]
+                f2 = self.bins_phi_mid >= gs_min_max[1]
                 filtr = f1 * f2
                 dist = dist[filtr]
                 bins = self.bins_phi_mid[filtr]
             else:
                 bins = self.bins_phi_mid
             return np.sum(dist * bins) / dist.sum()
-            
-    def bulk_std(self):
+
+    def bulk_std(self, gs_min_max=None):
         """
         calculate bulk standard deviation of all samples of tsunami sediments
         in trench
@@ -310,8 +310,16 @@ class GSFile(BaseGSFile):
             return np.nan
         else:
             dist = self.bulk_dist()
-            mean = self.bulk_mean()
-            dev = self.bins_phi_mid - mean
+            mean = self.bulk_mean(gs_min_max=gs_min_max)
+            if gs_min_max is not None:
+                f1 = self.bins_phi_mid <= gs_min_max[0]
+                f2 = self.bins_phi_mid >= gs_min_max[1]
+                filtr = f1 * f2
+                dist = dist[filtr]
+                bins = self.bins_phi_mid[filtr]
+            else:
+                bins = self.bins_phi_mid
+            dev = bins - mean
             variance = np.sum(dist * (dev ** 2)) / dist.sum()
             return np.sqrt(variance)
 
