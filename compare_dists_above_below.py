@@ -44,8 +44,8 @@ def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
     ## filter dists so that only layer values >= min_layer are plotted
     f1 = gsf.layer >= min_layer
     dists = gsf.dist_normed(normed_to=100)[:, f1]
-    mid_depth = gsf.mid_depth[gsf.layer >= f1]
-    means = gsf.dist_means()[gsf.layer >= f1]
+    mid_depth = gsf.mid_depth[f1]
+    means = gsf.dist_means()[f1]
     f2 = np.isfinite(mid_depth)
     dists = dists[:, f2]
     mid_depth = mid_depth[f2]
@@ -98,7 +98,7 @@ def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
     return figs
 
 
-def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='', 
+def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='',
              overwrite=False, dpi=300, transparent=False):
     """
     save figure "fig"
@@ -140,9 +140,9 @@ def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='',
 
 
 if __name__ == "__main__":
-    gsf_name = 'GS_Sumatra_KualaMerisi_trench16.csv'
+    gsf_name = 'GS_Chile_Coliumo_Trench7.csv'
     pd_pc = r'C:\Users\blunghino\Field Sites\Tsunami_Deposit_Database\TsuDepData\Uniform_GS_Data\\'
     pd_mac = '/Users/blunghino/Field_Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
-    gsf = GSFile(gsf_name, project_directory=pd_mac)
+    gsf = GSFile(gsf_name, project_directory=pd_pc)
     figs = compare_dists_above_below(gsf, phi_min_max=(0,4))
     plt.show()
