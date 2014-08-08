@@ -74,14 +74,23 @@ def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
             ax0.plot(bins, dists[:,ii-1], 'b')
             ax0.fill_between(bins, dists[:,ii-1], y2, color='b', alpha=.5)
             ax1.plot(means[ii-1], mid_depth[ii-1], 'o', c='b', ms=ms)
+            ax1.annotate('{:.2f}'.format(means[ii-1]),
+                         (means[ii-1], mid_depth[ii-1]), (4, 0),
+                         textcoords='offset points', fontsize=10)
         if ii != len(mid_depth) - 1:
             ax0.plot(bins, dists[:,ii+1], 'r')
             ax0.fill_between(bins, dists[:,ii+1], y2, color='r', alpha=.5)
             ax1.plot(means[ii+1], mid_depth[ii+1], 'o', c='r', ms=ms)
+            ax1.annotate('{:.2f}'.format(means[ii+1]),
+                         (means[ii+1], mid_depth[ii+1]), (4, 0),
+                         textcoords='offset points', fontsize=10)
         ax0.plot(bins, dists[:,ii], 'k', zorder=10)
         ax0.fill_between(bins, dists[:,ii], y2, color='DimGray', zorder=9,
                          alpha=.9)
         ax1.plot(means[ii], d, 'o', c='DimGray', ms=ms)
+        ax1.annotate('{:.2f}'.format(means[ii]),
+                     (means[ii], mid_depth[ii]), (4, 0),
+                     textcoords='offset points', fontsize=10)
         ax1.invert_yaxis()
         ax1.xaxis.set_major_locator(matplotlib.ticker.LinearLocator(3))
         ax1.set_xlabel(r'Mean Grain Size ($\mathsf{\phi}$)')

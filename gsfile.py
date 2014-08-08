@@ -328,6 +328,32 @@ class GSFile(BaseGSFile):
             dev = bins - mean
             variance = np.sum(dist * (dev ** 2)) / dist.sum()
             return np.sqrt(variance)
+            
+    def n_layers_in_layer_type(self, layer_type=1):
+        """
+        calculate the number of layers with a given classification
+        """
+        return len(set(self.layer[self.layer_type == layer_type]))
+        
+    def thickness_of_layers_in_layer_type(self, layer_type=1):
+        """
+        calculate the thicknesses of all layers of a given layer type
+        """
+        out = []
+        ## filter to get only layers of `layer_type`
+        f1 = self.layer_type == layer_type
+        for x in sorted(set(self.layer[f1])):
+            ## for each layer, calculate the thickness 
+            ## by subtracting the minimum and maximum depth
+            f2 = self.layer == x
+            f3 = f1 * f2
+            mn = min(self.min_depth[f3])
+            mx = max(self.max_depth[f3])
+            out.append(mx-mn)
+        if not out:
+            return None
+        else:
+            return np.asarray(out)
 
     def _get_depth_bin_edges(self, min_layer=-1):
         """
