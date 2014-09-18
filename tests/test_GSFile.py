@@ -203,7 +203,10 @@ class TestGSFileClass(unittest.TestCase):
         """
         check that _get_depth_bin_edges method returns the correct bin edges
         """
-        assert_array_equal(self.c._get_depth_bin_edges(), self.c_get_depth_bin_edges)
+        assert_array_equal(self.c._get_depth_bin_edges(), 
+                           self.c_get_depth_bin_edges)
+        assert_array_equal(self.c._get_depth_bin_edges(min_layer=2), 
+                           self.c_get_depth_bin_edges[:6])
 
     def test_gsfile_with_some_depths_empty(self):
         """

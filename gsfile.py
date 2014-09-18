@@ -191,7 +191,8 @@ class BaseGSFile:
 
 class GSFile(BaseGSFile):
     """
-    BaseGSFile subclass with methods to calculate statistics and make plots
+    subclass of BaseGSFile 
+    adds methods to calculate statistics and make plots
 
     Class to store and manipulate grain size data
 
@@ -210,8 +211,10 @@ class GSFile(BaseGSFile):
         sums = self.dists.sum(axis=0)
         mean = sums.mean()
         if abs(sums - mean).any() > sensitivity * mean:
-            warnings.warn('%s - distributions have inconsistent sums when normalizing'
-                          % self.__str__())
+            warnings.warn(
+                '%s - distributions have inconsistent sums when normalizing'
+                % self.__str__()
+            )
         normed_dists = np.ones_like(self.dists)
         for ii, dist in enumerate(self.dists.T):
             normed_dists[:,ii] = normed_to * dist / dist.sum()
@@ -269,15 +272,17 @@ class GSFile(BaseGSFile):
             m4[ii] = np.sum(dist * (devs[:, ii] / std) ** 4) / dist_sum
         return m1, m2, m3, m4
 
-    def bulk_dist(self):
+    def bulk_dist(self, depth_range=None):
         """
         calculate bulk distribution for all samples of tsunami
         sediments in trench
         """
+        ## check if depth data exists for all grain size distributions
         if not np.isnan(self.min_depth).any() and len(self.sample_id) > 1:
             dists = self.dists[:, self.layer > 0]
             diffs = [x - self.min_depth[ii] for ii, x in enumerate(self.max_depth)]
             length = sum(diffs)
+            ## weight distributions by depth range
             for ii in range(dists.shape[1]):
                 dists[:, ii] = dists[:, ii] * diffs[ii] / length
         else:
@@ -372,7 +377,7 @@ class GSFile(BaseGSFile):
             return np.hstack((min_depth, max_depth[-1]))
         ## some sample edges do not match
         else:
-            depths = np.zeros(self.min_depth.size + 1)
+            depths = np.zeros(min_depth.size + 1)
             depths[0] = min_depth[0]
             depths[-1] = max_depth[-1]
             for ii, (n, x) in enumerate(zip(min_depth[1:],
