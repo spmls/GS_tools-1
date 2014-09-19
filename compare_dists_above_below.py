@@ -13,6 +13,7 @@ matplotlib.rcParams['font.size'] = 16
 
 def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
                               figsize=(18,11), phi_min_max=None,
+                              min_size_for_mean=None,
                               depth_min_max=None, save_fig=False):
     """
     make a set of figures comparing a grain size distribution with
@@ -45,7 +46,7 @@ def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
     f1 = gsf.layer >= min_layer
     dists = gsf.dist_normed(normed_to=100)[:, f1]
     mid_depth = gsf.mid_depth[f1]
-    means = gsf.dist_means()[f1]
+    means = gsf.dist_means(min_size=min_size_for_mean)[f1]
     f2 = np.isfinite(mid_depth)
     dists = dists[:, f2]
     mid_depth = mid_depth[f2]
