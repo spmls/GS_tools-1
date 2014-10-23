@@ -150,9 +150,10 @@ def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='',
 
 
 if __name__ == "__main__":
-    gsf_name = 'GS_Chile_Coliumo_Trench7.csv'
+    gsf_name = 'GS_Sumatra_Jantang3_T8.csv'
+    pd_thailand = "c:\\Users\\blunghino\\Field Sites\\Thailand\\Data from Kruawun Jankaew\\Uniform_Format_GS_Data"
     pd_pc = r'C:\Users\blunghino\Field Sites\Tsunami_Deposit_Database\TsuDepData\Uniform_GS_Data\\'
     pd_mac = '/Users/blunghino/Field_Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
     gsf = GSFile(gsf_name, project_directory=pd_pc)
-    figs = compare_dists_above_below(gsf, phi_min_max=(0,4))
+    figs = compare_dists_above_below(gsf, phi_min_max=(-1,4))
     plt.show()
