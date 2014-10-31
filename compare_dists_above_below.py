@@ -8,7 +8,7 @@ import numpy as np
 from GS_tools.gsfile import GSFile
 
 
-matplotlib.rcParams['font.size'] = 16
+matplotlib.rcParams['font.size'] = 20
 
 
 def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
@@ -150,10 +150,10 @@ def figsaver(figs, fig_titles, save_fig='png', dir_path=None, dir_title='',
 
 
 if __name__ == "__main__":
-    gsf_name = 'GS_Sumatra_Jantang3_T8.csv'
+    gsf_name = 'GS_PapuaNewGuinea_Arop_Hole7.csv'
     pd_thailand = "c:\\Users\\blunghino\\Field Sites\\Thailand\\Data from Kruawun Jankaew\\Uniform_Format_GS_Data"
     pd_pc = r'C:\Users\blunghino\Field Sites\Tsunami_Deposit_Database\TsuDepData\Uniform_GS_Data\\'
     pd_mac = '/Users/blunghino/Field_Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
     gsf = GSFile(gsf_name, project_directory=pd_pc)
-    figs = compare_dists_above_below(gsf, phi_min_max=(-1,4))
+#    figs = compare_dists_above_below(gsf, phi_min_max=(0,5))
     plt.show()

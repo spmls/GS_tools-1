@@ -397,6 +397,13 @@ class GSFile(BaseGSFile):
 
         phi_min is the minimum phi value (maximum grain size)
         phi_max is the maximum phi value (minimum grain size)
+        show sg is a boolean indicating whether to plot different suspension 
+        graded layers in white and all other layers in black
+        tsunami_only is a boolean specifying whether to exclude layers not 
+        classified as tsunami deposits
+        min_layer specifies the minimum layer number to plot, it is set 
+        automatically when tsunami_only is True
+        unicode_label is a boolean, if True, writes the phi symbol in unicode
         """
         fig = plt.figure(figsize=figsize)
         ax = plt.subplot(111)
@@ -451,7 +458,7 @@ class GSFile(BaseGSFile):
         ## plot a line for each distribution
         for ii, d in enumerate(max_depth):
             ## normalize to the max, and scale to plot within the depth range
-            normed = dists[:, ii] * (min_depth[ii] - d) * .95 / dists[:, ii].max()
+            normed = dists[:,ii] * (min_depth[ii]-d) * .95 / dists[:,ii].max()
             plt.plot(bins, d + normed, color[ii], lw=2.25)
         ax.invert_yaxis()
         ax.set_xlim((phi_min, phi_max))
