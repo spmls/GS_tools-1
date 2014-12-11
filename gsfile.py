@@ -9,6 +9,7 @@ Created while working for the US Geological Survey
 import os
 import csv
 import warnings
+import itertools
 
 import numpy as np
 from matplotlib import cm, pyplot as plt
@@ -272,10 +273,13 @@ class GSFile(BaseGSFile):
             m4[ii] = np.sum(dist * (devs[:, ii] / std) ** 4) / dist_sum
         return m1, m2, m3, m4
 
-    def bulk_dist(self, depth_range=None):
+    def bulk_dist(self, target_layer=None):
         """
         calculate bulk distribution for all samples of tsunami
         sediments in trench
+        
+        use target layer to specify a specific layer number to work on, must 
+        be > 0
         """
         ## check if depth data exists for all grain size distributions
         if not np.isnan(self.min_depth).any() and len(self.sample_id) > 1:
@@ -287,21 +291,26 @@ class GSFile(BaseGSFile):
                 dists[:, ii] = dists[:, ii] * diffs[ii] / length
         else:
             dists = self.dists[:, self.layer > 0]
+        if target_layer is not None:
+            layers = self.layer[self.layer > 0]
+            dists = dists[:, layers == target_layer]
         bulk_dist = nanmean(dists, axis=1)
         bulk_dist = 100. * bulk_dist / bulk_dist.sum()
         return bulk_dist
 
-    def bulk_mean(self, gs_min_max=None):
+    def bulk_mean(self, gs_min_max=None, target_layer=None):
         """
         calculate bulk mean of all samples of tsunami sediments in trench
 
         gs_min_max is a sequence of length 2 specifying the minimum grain size
         and maximum grain size to include in the calculations (in phi)
+        
+        layer specifies a layer number for which to calculate the bulk mean
         """
         if self.bins_phi_mid is None:
             return np.nan
         else:
-            dist = self.bulk_dist()
+            dist = self.bulk_dist(target_layer=target_layer)
             if gs_min_max is not None:
                 f1 = self.bins_phi_mid <= gs_min_max[0]
                 f2 = self.bins_phi_mid >= gs_min_max[1]
@@ -312,7 +321,7 @@ class GSFile(BaseGSFile):
                 bins = self.bins_phi_mid
             return np.sum(dist * bins) / dist.sum()
 
-    def bulk_std(self, gs_min_max=None):
+    def bulk_std(self, gs_min_max=None, target_layer=None):
         """
         calculate bulk standard deviation of all samples of tsunami sediments
         in trench
@@ -320,8 +329,8 @@ class GSFile(BaseGSFile):
         if self.bins_phi_mid is None:
             return np.nan
         else:
-            dist = self.bulk_dist()
-            mean = self.bulk_mean(gs_min_max=gs_min_max)
+            dist = self.bulk_dist(target_layer=target_layer)
+            mean = self.bulk_mean(gs_min_max=gs_min_max, target_layer=target_layer)
             if gs_min_max is not None:
                 f1 = self.bins_phi_mid <= gs_min_max[0]
                 f2 = self.bins_phi_mid >= gs_min_max[1]
@@ -333,7 +342,27 @@ class GSFile(BaseGSFile):
             dev = bins - mean
             variance = np.sum(dist * (dev ** 2)) / dist.sum()
             return np.sqrt(variance)
-            
+    
+    def bulk_percentile(self, perc=50, target_layer=None):
+        """
+        calculate the `perc` percentile of the bulk grain size distribution
+        
+        returns the midpoint of the grain size bin in which the desired 
+        percentile occurs
+        """
+        if self.bins_phi_mid is None:
+            return np.nan
+        else:
+            dist = self.bulk_dist(target_layer=target_layer)
+            bins = self.bins_phi_mid
+            if bins[0] < bins[-1]:
+                ## reverse the order of bins and dist
+                dist = dist[::-1]
+                bins = bins[::-1]
+            cumdist = np.cumsum(dist)
+            ind = np.searchsorted(cumdist, perc)
+            return bins[ind]
+                    
     def n_layers_in_layer_type(self, layer_type=1):
         """
         calculate the number of layers with a given classification
@@ -359,6 +388,13 @@ class GSFile(BaseGSFile):
             return None
         else:
             return np.asarray(out)
+            
+    def get_layer_numbers_by_layer_type(self, layer_type=1):
+        """
+        returns a list of layer numbers for the layers of a given layer type
+        """
+        layers = self.layer[self.layer_type == layer_type]
+        return [k for k, g in itertools.groupby(layers)]
 
     def _get_depth_bin_edges(self, min_layer=-1):
         """

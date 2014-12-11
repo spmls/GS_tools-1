@@ -34,6 +34,7 @@ class TestGSFileClass(unittest.TestCase):
     c_bulk_mean =  1.657406209748447
     c_bulk_mean_sand =  1.544082097212654
     c_bulk_std = 0.933763
+    c_bulk_percentile = 1.6042 
     c_bulk_dist = ary([
                              0,
                              0,
@@ -241,7 +242,12 @@ class TestGSFileClass(unittest.TestCase):
         check that bulk mean works for specific gs fraction
         """
         self.assertAlmostEqual(self.c.bulk_mean(gs_min_max=(4, -1)), self.c_bulk_mean_sand, places=3)
-
-
+        
+    def test_gsfile_bulk_percentile(self):
+        """
+        check that percentiles are calculated correctly
+        """
+        self.assertEqual(self.c.bulk_percentile(), self.c_bulk_percentile)        
+        
 if __name__ == '__main__':
     unittest.main()

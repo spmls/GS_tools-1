@@ -8,7 +8,7 @@ import numpy as np
 from GS_tools.gsfile import GSFile
 
 
-matplotlib.rcParams['font.size'] = 20
+matplotlib.rcParams['font.size'] = 22
 
 
 def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
@@ -33,7 +33,8 @@ def compare_dists_above_below(gsf, tsunami_only=True, min_layer=None,
     depth_min_max: tuple (min_depth, max_depth) used to specify a range of depth
         values to plot
 
-    save_fig: if True, saves each fig as a png
+    save_fig: if False figures are not saved, else should specify a file 
+        extension to use to save all the figures, e.g. 'png'
     """
     figs = []
     ## set layer filter value
@@ -155,5 +156,6 @@ if __name__ == "__main__":
     pd_pc = r'C:\Users\blunghino\Field Sites\Tsunami_Deposit_Database\TsuDepData\Uniform_GS_Data\\'
     pd_mac = '/Users/blunghino/Field_Sites/Tsunami_Deposit_Database/TsuDepData/Uniform_GS_Data/'
     gsf = GSFile(gsf_name, project_directory=pd_pc)
+    f = gsf.fig_dists_depth(phi_min=0, phi_max=5, show_sg=True)
 #    figs = compare_dists_above_below(gsf, phi_min_max=(0,5))
     plt.show()
