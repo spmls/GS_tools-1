@@ -16,6 +16,8 @@ from matplotlib import cm, pyplot as plt
 from scipy.stats import nanmean
 
 
+## default codes for layer_type classifications.
+## see field explanations in csv_examples.
 layer_type_lookup = {
     -1: 'Post-tsunami',
     0: 'Pre-tsunami',
@@ -151,7 +153,10 @@ class BaseGSFile:
             setattr(self, seq, sorted)
 
     def get_csv_file_path(self, csv_file_location):
-        """return the full path to the csv file"""
+        """
+        return the full path to the csv file
+        override this method to customize file location process
+        """
         return os.path.join(self.project_directory, csv_file_location)
 
     def _convert_bins_to_phi(self):
@@ -211,6 +216,7 @@ class GSFile(BaseGSFile):
         """
         sums = self.dists.sum(axis=0)
         mean = sums.mean()
+        ## distributions should all sum to about the same number eg 1 or 100
         if abs(sums - mean).any() > sensitivity * mean:
             warnings.warn(
                 '%s - distributions have inconsistent sums when normalizing'
@@ -218,6 +224,7 @@ class GSFile(BaseGSFile):
             )
         normed_dists = np.ones_like(self.dists)
         for ii, dist in enumerate(self.dists.T):
+            ## normalization calculation
             normed_dists[:,ii] = normed_to * dist / dist.sum()
         return normed_dists
 
@@ -226,6 +233,7 @@ class GSFile(BaseGSFile):
         calculate the mean of each distribution
         """
         means = np.zeros_like(self.mid_depth)
+        ## filter out grain sizes smaller than min size
         if min_size:
             filtr = self.bins_phi_mid < min_size
             dists = self.dists[filtr, :]
@@ -234,6 +242,7 @@ class GSFile(BaseGSFile):
             dists = self.dists
             bins_phi_mid = self.bins_phi_mid
         for ii, dist in enumerate(dists.T):
+            ## mean grain size calculation
             means[ii] = np.sum(dist * bins_phi_mid) / dist.sum()
         return means
 
@@ -244,6 +253,7 @@ class GSFile(BaseGSFile):
         means = self.dist_means()
         devs = np.zeros_like(self.dists)
         for ii, m in enumerate(means):
+            ## deviation in grain size from mean calculation
             devs[:, ii] = self.bins_phi_mid - m
         return devs, means
 
@@ -254,6 +264,7 @@ class GSFile(BaseGSFile):
         devs = self.dist_devs()[0]
         variances = np.zeros_like(self.mid_depth)
         for ii, dist in enumerate(self.dists.T):
+            ## variance calculation
             variances[ii] = np.sum(dist * (devs[:, ii] ** 2)) / dist.sum()
         return np.sqrt(variances)
 
@@ -266,6 +277,7 @@ class GSFile(BaseGSFile):
         m3 = np.zeros_like(self.mid_depth)
         m4 = np.zeros_like(self.mid_depth)
         for ii, dist in enumerate(self.dists.T):
+            ## calculate each moment
             dist_sum = dist.sum()
             m2[ii] = np.sum(dist * devs[:, ii] ** 2) / dist_sum
             std = np.sqrt(m2[ii])
@@ -291,10 +303,13 @@ class GSFile(BaseGSFile):
                 dists[:, ii] = dists[:, ii] * diffs[ii] / length
         else:
             dists = self.dists[:, self.layer > 0]
+        ## only get bulk dist for grain size data associated with target_layer
         if target_layer is not None:
             layers = self.layer[self.layer > 0]
             dists = dists[:, layers == target_layer]
+        ## calculate bulk distribution
         bulk_dist = nanmean(dists, axis=1)
+        ## bulk dist is returned as percent of total
         bulk_dist = 100. * bulk_dist / bulk_dist.sum()
         return bulk_dist
 
@@ -311,6 +326,7 @@ class GSFile(BaseGSFile):
             return np.nan
         else:
             dist = self.bulk_dist(target_layer=target_layer)
+            ## filter based on minimum and maximum grain size
             if gs_min_max is not None:
                 f1 = self.bins_phi_mid <= gs_min_max[0]
                 f2 = self.bins_phi_mid >= gs_min_max[1]
@@ -319,6 +335,7 @@ class GSFile(BaseGSFile):
                 bins = self.bins_phi_mid[filtr]
             else:
                 bins = self.bins_phi_mid
+            ## calculate bulk mean
             return np.sum(dist * bins) / dist.sum()
 
     def bulk_std(self, gs_min_max=None, target_layer=None):
@@ -331,6 +348,7 @@ class GSFile(BaseGSFile):
         else:
             dist = self.bulk_dist(target_layer=target_layer)
             mean = self.bulk_mean(gs_min_max=gs_min_max, target_layer=target_layer)
+            ## filter based on minimum and maximum grain size
             if gs_min_max is not None:
                 f1 = self.bins_phi_mid <= gs_min_max[0]
                 f2 = self.bins_phi_mid >= gs_min_max[1]
@@ -339,6 +357,7 @@ class GSFile(BaseGSFile):
                 bins = self.bins_phi_mid[filtr]
             else:
                 bins = self.bins_phi_mid
+            ## calculate bulk standard deviation
             dev = bins - mean
             variance = np.sum(dist * (dev ** 2)) / dist.sum()
             return np.sqrt(variance)
@@ -359,8 +378,11 @@ class GSFile(BaseGSFile):
                 ## reverse the order of bins and dist
                 dist = dist[::-1]
                 bins = bins[::-1]
+            ## get cumulative sum of distribution
             cumdist = np.cumsum(dist)
+            ## find where perc occurs
             ind = np.searchsorted(cumdist, perc)
+            ## return phi bin value associated with perc
             return bins[ind]
                     
     def n_layers_in_layer_type(self, layer_type=1):
