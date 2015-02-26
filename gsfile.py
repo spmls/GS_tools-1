@@ -194,7 +194,6 @@ class BaseGSFile:
     def __str__(self):
         return self.id
 
-
 class GSFile(BaseGSFile):
     """
     subclass of BaseGSFile 
@@ -572,3 +571,4 @@ class GSFile(BaseGSFile):
         else:
             plt.xlabel(r'Size ($\mathsf{\phi}$)')
         return fig
+
