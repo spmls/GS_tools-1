@@ -11,7 +11,7 @@ import numpy as np
 from numpy import asarray as ary
 from numpy.testing import assert_allclose, assert_array_equal, assert_array_almost_equal
 
-import TsuDB as tdb
+from GS_tools.gsfile import GSFile
 
 
 class TestGSFileClass(unittest.TestCase):
@@ -171,10 +171,10 @@ class TestGSFileClass(unittest.TestCase):
     d_mid_depth = ary([5.5, np.nan])
     d_min_depth = ary([5, np.nan])
 
-    a = tdb.TsuDBGSFile(a_csv_file_name)
-    b = tdb.TsuDBGSFile(b_csv_file_name)
-    c = tdb.TsuDBGSFile(c_csv_file_name)
-    d = tdb.TsuDBGSFile(d_csv_file_name)
+    a = GSFile(a_csv_file_name)
+    b = GSFile(b_csv_file_name)
+    c = GSFile(c_csv_file_name)
+    d = GSFile(d_csv_file_name)
 
     def test_gsfile_init(self):
         """

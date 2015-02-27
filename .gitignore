@@ -1,5 +1,7 @@
 *.py[cod]
 
+tests/*.csv
+
 # C extensions
 *.so
 
