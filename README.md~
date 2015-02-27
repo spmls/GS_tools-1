@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 GS_tools
 ========
 
@@ -39,3 +40,4 @@ look in the csv directory for examples of how grain size data csv files
 should be formatted to read with the BaseGSFile class
 
 developed at the US Geological Survey
+>>>>>>> origin

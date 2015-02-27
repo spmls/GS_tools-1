@@ -11,7 +11,7 @@ import numpy as np
 from numpy import asarray as ary
 from numpy.testing import assert_allclose, assert_array_equal, assert_array_almost_equal
 
-import TsuDB as tdb
+from GS_tools.gsfile import GSFile
 
 
 class TestGSFileClass(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestGSFileClass(unittest.TestCase):
     c_bulk_mean =  1.657406209748447
     c_bulk_mean_sand =  1.544082097212654
     c_bulk_std = 0.933763
-    c_bulk_percentile = 1.6042 
+    c_bulk_percentile = 1.6042
     c_bulk_dist = ary([
                              0,
                              0,
@@ -171,10 +171,10 @@ class TestGSFileClass(unittest.TestCase):
     d_mid_depth = ary([5.5, np.nan])
     d_min_depth = ary([5, np.nan])
 
-    a = tdb.TsuDBGSFile(a_csv_file_name)
-    b = tdb.TsuDBGSFile(b_csv_file_name)
-    c = tdb.TsuDBGSFile(c_csv_file_name)
-    d = tdb.TsuDBGSFile(d_csv_file_name)
+    a = GSFile(a_csv_file_name)
+    b = GSFile(b_csv_file_name)
+    c = GSFile(c_csv_file_name)
+    d = GSFile(d_csv_file_name)
 
     def test_gsfile_init(self):
         """
@@ -204,9 +204,9 @@ class TestGSFileClass(unittest.TestCase):
         """
         check that _get_depth_bin_edges method returns the correct bin edges
         """
-        assert_array_equal(self.c._get_depth_bin_edges(), 
+        assert_array_equal(self.c._get_depth_bin_edges(),
                            self.c_get_depth_bin_edges)
-        assert_array_equal(self.c._get_depth_bin_edges(min_layer=2), 
+        assert_array_equal(self.c._get_depth_bin_edges(min_layer=2),
                            self.c_get_depth_bin_edges[:6])
 
     def test_gsfile_with_some_depths_empty(self):
@@ -242,12 +242,12 @@ class TestGSFileClass(unittest.TestCase):
         check that bulk mean works for specific gs fraction
         """
         self.assertAlmostEqual(self.c.bulk_mean(gs_min_max=(4, -1)), self.c_bulk_mean_sand, places=3)
-        
+
     def test_gsfile_bulk_percentile(self):
         """
         check that percentiles are calculated correctly
         """
-        self.assertEqual(self.c.bulk_percentile(), self.c_bulk_percentile)        
-        
+        self.assertEqual(self.c.bulk_percentile(), self.c_bulk_percentile)
+
 if __name__ == '__main__':
     unittest.main()
