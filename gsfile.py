@@ -437,6 +437,7 @@ class SedlabGSFile(GSFile):
 
         # set grainsize data attributes
         self.layer = np.asarray(layernum, dtype = np.int)
+        self.sample_id = np.asarray(SampleID)
         self.min_depth = np.asarray(MinDepth, dtype = np.float64)
         self.max_depth = np.asarray(MaxDepth, dtype = np.float64)
         self.bins = phi
