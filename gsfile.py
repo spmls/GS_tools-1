@@ -180,11 +180,14 @@ class BaseGSFile:
 
     def _convert_bins_to_phi_mid(self):
         """
-        internal method to convert bins to phi midpoints
+        internal method to convert bins to phi midpoints 
+        (needed for some grain size statistics calculations)
         """
+        ## if bins are already in phi mid do nothing
         if self.bin_units == 'phi mid':
             return self.bins
         elif self.bins_phi is not None:
+            ## find midpoints of bins
             mpt1 = np.asarray(self.bins_phi[0] + 0.5 * (self.bins_phi[0] - self.bins_phi[1]))
             bins_phi_mid = self.bins_phi[1:] + 0.5 * (self.bins_phi[:-1] - self.bins_phi[1:])
             return np.hstack((mpt1, bins_phi_mid))
@@ -454,7 +457,7 @@ class GSFile(BaseGSFile):
 
         phi_min is the minimum phi value (maximum grain size)
         phi_max is the maximum phi value (minimum grain size)
-        show sg is a boolean indicating whether to plot different suspension 
+        show_sg is a boolean indicating whether to plot different suspension 
         graded layers in white and all other layers in black
         tsunami_only is a boolean specifying whether to exclude layers not 
         classified as tsunami deposits
@@ -533,6 +536,14 @@ class GSFile(BaseGSFile):
                           unicode_label=False):
         """
         plot grain size distributions on one axis
+        
+        phi_min is the minimum phi value (maximum grain size)
+        phi_max is the maximum phi value (minimum grain size)
+        tsunami_only is a boolean specifying whether to exclude layers not 
+        classified as tsunami deposits
+        min_layer specifies the minimum layer number to plot, it is set 
+        automatically when tsunami_only is True
+        unicode_label is a boolean, if True, writes the phi symbol in unicode
         """
         fig = plt.figure(figsize=figsize)
         ax = plt.subplot(111)
