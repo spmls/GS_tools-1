@@ -391,7 +391,7 @@ class GSFile(BaseGSFile):
 
     def fig_dists_depth(self, figsize=(8, 10), phi_min=-2, phi_max=4,
                         pcolor=True, tsunami_only=True, min_layer=None,
-                        unicode_label=False, show_sg=False):
+                        unicode_label=False, show_sg=False, norm_dist=False):
         """
         create a matplotlib figure plotting grain size distribution with depth
 
@@ -415,7 +415,10 @@ class GSFile(BaseGSFile):
             else:
                 min_layer = -1
         ## filter dists so that only layer values >= min_layer are plotted
-        dists = self.dists[:, self.layer >= min_layer]
+        if norm_dist is True:
+            dists = self.dist_normed()[:, self.layer >= min_layer]
+        else:
+            dists = self.dists[:, self.layer >= min_layer]
         max_depth = self.max_depth[self.layer >= min_layer]
         min_depth = self.min_depth[self.layer >= min_layer]
         layer_type = self.layer_type[self.layer >= min_layer]
@@ -427,9 +430,10 @@ class GSFile(BaseGSFile):
         elif np.isnan(max_depth).any():
             pcolor = False
         ## create pcolor
+        cmap = 'inferno'
         if pcolor:
             depths = self._get_depth_bin_edges(min_layer=min_layer)
-            plt.pcolormesh(self.bins_phi_mid, depths, dists.T)
+            plt.pcolormesh(self.bins_phi_mid, depths, dists.T, cmap = cmap)
             color = 'w'
             cbar = plt.colorbar(orientation='vertical', fraction=.075, pad=.1,
                                 aspect=30, shrink=.75)
@@ -473,7 +477,7 @@ class GSFile(BaseGSFile):
 
     def fig_dists_stacked(self, figsize=(16, 12), phi_min=-2, phi_max=4,
                           tsunami_only=True, min_layer=None,
-                          unicode_label=False):
+                          unicode_label=False, norm_dist=False):
         """
         plot grain size distributions on one axis
         """
@@ -491,7 +495,7 @@ class GSFile(BaseGSFile):
         n_dists = dists.shape[1]
         labels = [self.sample_id[ii] for ii, L in enumerate(self.layer) if L >= min_layer]
         ## set up custom cmap
-        cmap = cm.get_cmap('spectral')
+        cmap = cm.get_cmap('viridis_r')
         c = [cmap(1. * ((ii + 1) / (n_dists + 1))) for ii in range(n_dists)]
         ## set phi bins
         if self.bins_phi is not None:
@@ -504,8 +508,12 @@ class GSFile(BaseGSFile):
                      ha='center')
             return fig
         ## plot each distribution
-        for ii, d in enumerate(dists.T):
-            plt.plot(bins, d, c=c[ii], label=labels[ii], lw=1.5)
+        if norm_dist is True:
+            for ii, d in enumerate(self.dist_normed().T):
+                plt.plot(bins, d, c=c[ii], label=labels[ii], lw=1.5)
+        else:
+            for ii, d in enumerate(dists.T):
+                plt.plot(bins, d, c=c[ii], label=labels[ii], lw=1.5)
         plt.legend(loc=0)
         ax.set_xlim((phi_min, phi_max))
         plt.ylabel(self.distribution_units)
