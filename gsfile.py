@@ -13,7 +13,7 @@ import itertools
 
 import numpy as np
 from matplotlib import cm, pyplot as plt
-from scipy.stats import nanmean
+from numpy import nanmean
 
 
 ## default codes for layer_type classifications.
@@ -180,7 +180,7 @@ class BaseGSFile:
 
     def _convert_bins_to_phi_mid(self):
         """
-        internal method to convert bins to phi midpoints 
+        internal method to convert bins to phi midpoints
         (needed for some grain size statistics calculations)
         """
         ## if bins are already in phi mid do nothing
@@ -199,7 +199,7 @@ class BaseGSFile:
 
 class GSFile(BaseGSFile):
     """
-    subclass of BaseGSFile 
+    subclass of BaseGSFile
     adds methods to calculate statistics and make plots
 
     Class to store and manipulate grain size data
@@ -291,8 +291,8 @@ class GSFile(BaseGSFile):
         """
         calculate bulk distribution for all samples of tsunami
         sediments in trench
-        
-        use target layer to specify a specific layer number to work on, must 
+
+        use target layer to specify a specific layer number to work on, must
         be > 0
         """
         ## check if depth data exists for all grain size distributions
@@ -321,7 +321,7 @@ class GSFile(BaseGSFile):
 
         gs_min_max is a sequence of length 2 specifying the minimum grain size
         and maximum grain size to include in the calculations (in phi)
-        
+
         layer specifies a layer number for which to calculate the bulk mean
         """
         if self.bins_phi_mid is None:
@@ -363,12 +363,12 @@ class GSFile(BaseGSFile):
             dev = bins - mean
             variance = np.sum(dist * (dev ** 2)) / dist.sum()
             return np.sqrt(variance)
-    
+
     def bulk_percentile(self, perc=50, target_layer=None):
         """
         calculate the `perc` percentile of the bulk grain size distribution
-        
-        returns the midpoint of the grain size bin in which the desired 
+
+        returns the midpoint of the grain size bin in which the desired
         percentile occurs
         """
         if self.bins_phi_mid is None:
@@ -386,13 +386,13 @@ class GSFile(BaseGSFile):
             ind = np.searchsorted(cumdist, perc)
             ## return phi bin value associated with perc
             return bins[ind]
-                    
+
     def n_layers_in_layer_type(self, layer_type=1):
         """
         calculate the number of layers with a given classification
         """
         return len(set(self.layer[self.layer_type == layer_type]))
-        
+
     def thickness_of_layers_in_layer_type(self, layer_type=1):
         """
         calculate the thicknesses of all layers of a given layer type
@@ -401,7 +401,7 @@ class GSFile(BaseGSFile):
         ## filter to get only layers of `layer_type`
         f1 = self.layer_type == layer_type
         for x in sorted(set(self.layer[f1])):
-            ## for each layer, calculate the thickness 
+            ## for each layer, calculate the thickness
             ## by subtracting the minimum and maximum depth
             f2 = self.layer == x
             f3 = f1 * f2
@@ -412,7 +412,7 @@ class GSFile(BaseGSFile):
             return None
         else:
             return np.asarray(out)
-            
+
     def get_layer_numbers_by_layer_type(self, layer_type=1):
         """
         returns a list of layer numbers for the layers of a given layer type
@@ -457,11 +457,11 @@ class GSFile(BaseGSFile):
 
         phi_min is the minimum phi value (maximum grain size)
         phi_max is the maximum phi value (minimum grain size)
-        show_sg is a boolean indicating whether to plot different suspension 
+        show_sg is a boolean indicating whether to plot different suspension
         graded layers in white and all other layers in black
-        tsunami_only is a boolean specifying whether to exclude layers not 
+        tsunami_only is a boolean specifying whether to exclude layers not
         classified as tsunami deposits
-        min_layer specifies the minimum layer number to plot, it is set 
+        min_layer specifies the minimum layer number to plot, it is set
         automatically when tsunami_only is True
         unicode_label is a boolean, if True, writes the phi symbol in unicode
         """
@@ -536,12 +536,12 @@ class GSFile(BaseGSFile):
                           unicode_label=False):
         """
         plot grain size distributions on one axis
-        
+
         phi_min is the minimum phi value (maximum grain size)
         phi_max is the maximum phi value (minimum grain size)
-        tsunami_only is a boolean specifying whether to exclude layers not 
+        tsunami_only is a boolean specifying whether to exclude layers not
         classified as tsunami deposits
-        min_layer specifies the minimum layer number to plot, it is set 
+        min_layer specifies the minimum layer number to plot, it is set
         automatically when tsunami_only is True
         unicode_label is a boolean, if True, writes the phi symbol in unicode
         """
@@ -582,4 +582,3 @@ class GSFile(BaseGSFile):
         else:
             plt.xlabel(r'Size ($\mathsf{\phi}$)')
         return fig
-
